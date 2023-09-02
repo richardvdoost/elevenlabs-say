@@ -42,9 +42,10 @@ def main():
         return 0
 
     if args.voice is None:
-        voice = random.choice(
-            [voice.name for voice in voices if voice.labels.get("gender") == "female"]
-        )
+        female_voices = [
+            v.name for v in voices if v.labels and v.labels.get("gender") == "female"
+        ]
+        voice = random.choice(female_voices) if female_voices else "Rachel"
         logger.debug(f"Picking random female voice: {voice}")
 
     else:
@@ -91,11 +92,14 @@ def get_latest_model(cache_dir: Path):
             models = pickle.load(fp)
     else:
         logger.debug("Fetching models from API")
-        models = Models.from_api()
+        try:
+            models = Models.from_api()
+        except:
+            models = []
         with open(models_path, "wb") as fp:
             pickle.dump(models, fp)
 
-    return models[0].model_id
+    return models[0].model_id if len(models) else "eleven_monolingual_v1"
 
 
 def say(text: str, voice: str, model_id: str, cache_dir: Path):

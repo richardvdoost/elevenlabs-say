@@ -38,11 +38,12 @@ def main():
     model_id = get_latest_model(CACHE_DIR)
 
     if args.voice == "All":
+        success = False
         for voice in voice_names:
             logger.debug(voice)
-            say(text, voice, model_id, CACHE_DIR)
+            success = say(text, voice, model_id, CACHE_DIR)
 
-        return 0
+        return 0 if success else 1
 
     voice_choices = None
     if args.voice == "Any":
@@ -59,9 +60,9 @@ def main():
     else:
         voice = args.voice or DEFAULT_VOICE_NAME
 
-    say(text, voice, model_id, CACHE_DIR)
+    success = say(text, voice, model_id, CACHE_DIR)
 
-    return 0
+    return 0 if success else 1
 
 
 def get_voices(cache_dir: Path):
@@ -124,10 +125,14 @@ def say(text: str, voice: str, model_id: str, cache_dir: Path):
             stream(fp)
     else:
         logger.debug("Generating and playing audio")
-        audio = generate(text, voice=voice, model=model_id)
-        assert type(audio) is bytes
-        save(audio, str(filepath))
-        play(audio)
+        try:
+            audio = generate(text, voice=voice, model=model_id)
+            assert type(audio) is bytes
+            save(audio, str(filepath))
+            play(audio)
+        except:
+            return False
+    return True
 
 
 if __name__ == "__main__":

@@ -14,22 +14,25 @@ from elevenlabs import stream
 from elevenlabs import voices as elevenlabs_voices
 from elevenlabs.api import Models
 
-load_dotenv()
-
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 
 def main():
+    load_dotenv()
+
     CACHE_DIR = Path(
         os.path.join(os.getenv("XDG_CACHE_HOME", "~/.cache"), "elevenlabs")
     )
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    DEFAULT_VOICE_NAME = os.getenv("DEFAULT_VOICE_NAME", "Bella")
 
     voices = get_voices(CACHE_DIR)
     voice_names = [voice.name for voice in voices]
-    args = parse_args(voice_names + ["All", "Random"])
+    args = parse_args(["Any", "Male", "Female", "All"] + voice_names)
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
 
     text = " ".join(args.text)
     model_id = get_latest_model(CACHE_DIR)
@@ -41,16 +44,20 @@ def main():
 
         return 0
 
-    if args.voice is None:
-        female_voices = [
-            v.name for v in voices if v.labels and v.labels.get("gender") == "female"
-        ]
-        voice = random.choice(female_voices) if female_voices else "Rachel"
-        logger.debug(f"Picking random female voice: {voice}")
+    voice_choices = None
+    if args.voice == "Any":
+        voice_choices = voice_names
 
+    if args.voice is None or args.voice in {"Male", "Female"}:
+        gender = "female" if args.voice is None else args.voice.lower()
+        voice_choices = [
+            v.name for v in voices if v.labels and v.labels.get("gender") == gender
+        ]
+
+    if voice_choices:
+        voice = random.choice(voice_choices)
     else:
-        logger.debug(f"Using voice {args.voice}")
-        voice = random.choice(voice_names) if args.voice == "Random" else args.voice
+        voice = args.voice or DEFAULT_VOICE_NAME
 
     say(text, voice, model_id, CACHE_DIR)
 
@@ -79,6 +86,7 @@ def parse_args(voice_names: list[str]):
     )
     parser.add_argument("text", nargs="+")
     parser.add_argument("-v", "--voice", type=str, choices=voice_names)
+    parser.add_argument("-d", "--debug", action="store_true")
 
     return parser.parse_args()
 
@@ -103,6 +111,8 @@ def get_latest_model(cache_dir: Path):
 
 
 def say(text: str, voice: str, model_id: str, cache_dir: Path):
+    logger.debug(f"Picking voice: {voice}")
+
     key = f"{voice}:{text}"
     hash = hashlib.sha256(key.encode()).hexdigest()
 

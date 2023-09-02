@@ -5,7 +5,7 @@ install: .env .venv
 	@sudo ln -s "$$(pwd)/say.sh" /usr/local/bin/say
 
 .env:
-	cp .env.example .env
+	@cp .env.example .env
 
 .venv:
 	@python3 -m venv .venv

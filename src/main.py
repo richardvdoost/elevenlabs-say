@@ -49,10 +49,11 @@ def main():
     if args.voice == "Any":
         voice_choices = voice_names
 
-    if args.voice is None or args.voice in {"Male", "Female"}:
-        gender = "female" if args.voice is None else args.voice.lower()
+    if args.voice in {"Male", "Female"}:
         voice_choices = [
-            v.name for v in voices if v.labels and v.labels.get("gender") == gender
+            v.name
+            for v in voices
+            if v.labels and v.labels.get("gender") == args.voice.lower()
         ]
 
     if voice_choices:

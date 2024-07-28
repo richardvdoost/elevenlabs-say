@@ -129,9 +129,9 @@ def say(client: ElevenLabs, text: str, voice: str, model_id: str, cache_dir: Pat
             audio = client.generate(text=text, voice=voice, model=model_id)
             save(audio, str(filepath))
 
-        except Exception as e:
-            logger.error("Failed to generate audio")
-            logger.exception(e)
+        except Exception:
+            # logger.error("Failed to generate audio")
+            # logger.exception(e)
 
             return False
     else:
@@ -141,10 +141,10 @@ def say(client: ElevenLabs, text: str, voice: str, model_id: str, cache_dir: Pat
         with open(filepath, "rb") as fp:
             play(fp)
 
-    except Exception as e:
-        logger.error("Failed to play audio")
-        logger.exception(e)
-        logger.debug("Removing cache audio file")
+    except Exception:
+        # logger.error("Failed to play audio")
+        # logger.exception(e)
+        # logger.debug("Removing cache audio file")
         filepath.unlink()
 
         return False

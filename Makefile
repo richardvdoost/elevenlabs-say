@@ -12,3 +12,4 @@ install: .env .venv
 
 uninstall:
 	-@sudo rm /usr/local/bin/say
+	-@rm -rf .venv

@@ -12,18 +12,20 @@ from elevenlabs.client import ElevenLabs
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def main():
-    load_dotenv()
+    load_dotenv(Path(__file__).parent.parent / ".env")
 
     CACHE_DIR = Path(
         os.path.join(os.getenv("XDG_CACHE_HOME", "~/.cache"), "elevenlabs")
     )
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    DEFAULT_VOICE_NAME = os.getenv("DEFAULT_VOICE_NAME", "Sarah")
+    DEFAULT_VOICE_NAME = os.getenv("DEFAULT_VOICE_NAME", "Matilda")
 
-    client = ElevenLabs()
+    client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+
     voices = get_voices(client, CACHE_DIR)
     voice_names = [voice.name for voice in voices if type(voice.name) is str]
 
@@ -129,9 +131,9 @@ def say(client: ElevenLabs, text: str, voice: str, model_id: str, cache_dir: Pat
             audio = client.generate(text=text, voice=voice, model=model_id)
             save(audio, str(filepath))
 
-        except Exception:
-            # logger.error("Failed to generate audio")
-            # logger.exception(e)
+        except Exception as e:
+            logger.error("Failed to generate audio")
+            logger.exception(e)
 
             return False
     else:

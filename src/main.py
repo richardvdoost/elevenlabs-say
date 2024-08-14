@@ -12,15 +12,12 @@ from elevenlabs.client import ElevenLabs
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def main():
     load_dotenv(Path(__file__).parent.parent / ".env")
 
-    CACHE_DIR = Path(
-        os.path.join(os.getenv("XDG_CACHE_HOME", "~/.cache"), "elevenlabs")
-    )
+    CACHE_DIR = Path(os.getenv("XDG_CACHE_HOME", "~/.cache")) / "elevenlabs"
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     DEFAULT_VOICE_NAME = os.getenv("DEFAULT_VOICE_NAME", "Matilda")
 

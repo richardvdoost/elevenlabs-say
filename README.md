@@ -2,6 +2,11 @@
 
 Using elevenlabs.io to improve the `say` command on MacOS.
 
+## Requirements
+
+- `python 3.12+`
+- `ffmpeg`
+
 ## Install
 
 Run `make` in the project folder. This will setup a virtual environment in the project

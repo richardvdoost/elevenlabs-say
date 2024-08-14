@@ -13,11 +13,10 @@ from elevenlabs.client import ElevenLabs
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
-
 def main():
     load_dotenv(Path(__file__).parent.parent / ".env")
 
-    CACHE_DIR = Path(os.getenv("XDG_CACHE_HOME", "~/.cache")) / "elevenlabs"
+    CACHE_DIR = Path(os.getenv("XDG_CACHE_HOME", Path(os.getenv("HOME")) / ".cache")) / "elevenlabs"
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     DEFAULT_VOICE_NAME = os.getenv("DEFAULT_VOICE_NAME", "Matilda")
 
@@ -109,7 +108,7 @@ def get_latest_model(client: ElevenLabs, cache_dir: Path):
         with open(models_path, "wb") as fp:
             pickle.dump(models, fp)
 
-    return models[0].model_id if len(models) else "eleven_monolingual_v1"
+    return models[0].model_id if len(models) else "eleven_monolingual_v2"
 
 
 def say(client: ElevenLabs, text: str, voice: str, model_id: str, cache_dir: Path):
@@ -141,9 +140,9 @@ def say(client: ElevenLabs, text: str, voice: str, model_id: str, cache_dir: Pat
             play(fp)
 
     except Exception:
-        # logger.error("Failed to play audio")
-        # logger.exception(e)
-        # logger.debug("Removing cache audio file")
+        logger.error("Failed to play audio")
+        logger.exception(e)
+        logger.debug("Removing cache audio file")
         filepath.unlink()
 
         return False
